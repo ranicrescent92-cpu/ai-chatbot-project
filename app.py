@@ -16,17 +16,21 @@ if not api_key:
     st.warning("⚠️ Please add your Gemini API Key in Streamlit Cloud Secrets settings.")
     st.stop()
 
-client = genai.Client(api_key=api_key)
+# Initialize client and chat session in session state so they persist across reruns
+if "client" not in st.session_state:
+    st.session_state.client = genai.Client(api_key=api_key)
 
-# Initialize chat session state
-if "chat_history" not in st.session_state:
-    st.session_state.chat = client.chats.create(
+if "chat" not in st.session_state:
+    system_instruction = "You are a helpful and educational AI assistant created for a Class 12 Artificial Intelligence project."
+    st.session_state.chat = st.session_state.client.chats.create(
         model="gemini-2.5-flash",
         config=types.GenerateContentConfig(
-            system_instruction="You are a helpful and educational AI assistant created for a Class 12 Artificial Intelligence project.",
+            system_instruction=system_instruction,
             temperature=0.7,
         )
     )
+
+if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 # Display chat messages
